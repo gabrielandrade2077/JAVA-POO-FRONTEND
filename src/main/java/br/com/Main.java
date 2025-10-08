@@ -1,5 +1,6 @@
 package br.com;
 
+import br.com.pdv.view.MainScreen;
 import javax.swing.*;
 
 public class Main {
