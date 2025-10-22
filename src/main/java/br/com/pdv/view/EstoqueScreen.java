@@ -128,7 +128,7 @@ public class EstoqueScreen extends JPanel {
                 estoque.setDataValidade(LocalDate.parse(dataValidadeField.getText()));
             }
 
-            Estoque estoqueSalvo = estoqueService.adicionarItemEstoque(estoque);
+            Estoque estoqueSalvo = estoqueService.salvarEstoque(estoque);
             if (estoqueSalvo != null) {
                 JOptionPane.showMessageDialog(this, "Item adicionado ao estoque com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 limparFormulario();

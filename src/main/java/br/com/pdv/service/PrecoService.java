@@ -1,77 +1,94 @@
 package br.com.pdv.service;
 
 import br.com.pdv.model.Preco;
-import br.com.pdv.model.Produto;
+import br.com.pdv.util.LocalDateAdapter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
-import java.math.BigDecimal;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Classe de serviço MOCK para gerenciar a comunicação com a API de Preços.
- * Esta versão simula as operações em memória para testes do front-end.
+ * Classe de serviço para gerenciar a comunicação com a API de Preços.
  */
 public class PrecoService {
 
-    private final List<Preco> mockDatabase = new ArrayList<>();
-    private final AtomicLong idCounter = new AtomicLong(0);
-    private final ProdutoService produtoService = new ProdutoService(); // Para obter produtos mockados
+    private final HttpClient client = HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .build();
 
-    public PrecoService() {
-        // Adiciona alguns preços de exemplo ao iniciar o serviço
-        // Certifique-se de que os produtos mockados existam no ProdutoService mock
-        List<Produto> produtosMock = produtoService.listarProdutos();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+            .create();
+    private final String API_URL = "http://localhost:8080/api/v1/precos";
 
-        if (!produtosMock.isEmpty()) {
-            Produto prod1 = produtosMock.get(0); // Ex: Gasolina Comum
-            Produto prod2 = produtosMock.get(1); // Ex: Água Mineral
+    // Classe interna para ajudar a desserializar a resposta paginada do Spring
+    private static class PageResponse<T> {
+        List<T> content;
+    }
 
-            Preco p1 = new Preco();
-            p1.setId(idCounter.incrementAndGet());
-            p1.setValor(new BigDecimal("5.99"));
-            p1.setDataAlteracao(LocalDate.now().minusDays(10));
-            p1.setProduto(prod1);
-            mockDatabase.add(p1);
+    /**
+     * Busca a lista de todos os preços da API.
+     * @return Uma lista de preços.
+     */
+    public List<Preco> listarPrecos() {
+        try {
+            String urlComPaginacao = API_URL + "?page=0&size=100"; // Pede até 100 itens
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlComPaginacao))
+                    .header("Accept", "application/json")
+                    .GET()
+                    .build();
 
-            Preco p2 = new Preco();
-            p2.setId(idCounter.incrementAndGet());
-            p2.setValor(new BigDecimal("2.50"));
-            p2.setDataAlteracao(LocalDate.now().minusDays(5));
-            p2.setProduto(prod2);
-            mockDatabase.add(p2);
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            Preco p3 = new Preco();
-            p3.setId(idCounter.incrementAndGet());
-            p3.setValor(new BigDecimal("6.10"));
-            p3.setDataAlteracao(LocalDate.now());
-            p3.setProduto(prod1);
-            mockDatabase.add(p3);
+            if (response.statusCode() == 200) {
+                Type pageType = new TypeToken<PageResponse<Preco>>() {}.getType();
+                PageResponse<Preco> pageResponse = gson.fromJson(response.body(), pageType);
+                return pageResponse.content;
+            } else {
+                System.err.println("Erro ao listar preços: " + response.statusCode() + " " + response.body());
+                return new ArrayList<>();
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
         }
     }
 
     /**
-     * Busca a lista de todos os preços (mock).
-     * @return Uma lista de preços.
-     */
-    public List<Preco> listarPrecos() {
-        System.out.println("MOCK: Listando todos os preços...");
-        return new ArrayList<>(mockDatabase); // Retorna uma cópia para evitar modificações externas
-    }
-
-    /**
-     * Salva um novo preço (mock).
+     * Salva um novo preço via API (somente POST).
      * @param preco O objeto Preco a ser salvo.
-     * @return O preço salvo (com ID, se for novo).
+     * @return O preço salvo.
      */
     public Preco salvarPreco(Preco preco) {
-        // A API de preços não tem PUT, apenas POST para novos registros
-        preco.setId(idCounter.incrementAndGet());
-        preco.setDataAlteracao(LocalDate.now()); // Garante que a data seja a atual para novos registros
-        mockDatabase.add(preco);
-        System.out.println("MOCK: Criando novo preço com ID: " + preco.getId() + " para o produto: " + preco.getProduto().getNome());
-        return preco; // Retorna o preço com ID atribuído
+        try {
+            String jsonBody = gson.toJson(preco);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_URL))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 201) { // HTTP 201 Created
+                return gson.fromJson(response.body(), Preco.class);
+            } else {
+                System.err.println("Erro ao salvar preço: " + response.statusCode() + " " + response.body());
+                return null;
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

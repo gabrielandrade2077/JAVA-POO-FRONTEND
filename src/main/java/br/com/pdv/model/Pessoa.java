@@ -1,9 +1,12 @@
 package br.com.pdv.model;
 
+import java.time.LocalDate;
+
 public class Pessoa {
     private Long id;
     private String nomeCompleto;
     private String cpfCnpj;
+    private LocalDate dataNascimento;
     private TipoPessoa tipoPessoa;
     private Contato contato;
 
@@ -30,6 +33,14 @@ public class Pessoa {
 
     public void setCpfCnpj(String cpfCnpj) {
         this.cpfCnpj = cpfCnpj;
+    }
+
+    public LocalDate getDataNascimento() {
+        return dataNascimento;
+    }
+
+    public void setDataNascimento(LocalDate dataNascimento) {
+        this.dataNascimento = dataNascimento;
     }
 
     public TipoPessoa getTipoPessoa() {

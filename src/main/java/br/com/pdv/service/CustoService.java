@@ -1,64 +1,94 @@
 package br.com.pdv.service;
 
 import br.com.pdv.model.Custo;
+import br.com.pdv.util.LocalDateAdapter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
-import java.math.BigDecimal;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Classe de serviço MOCK para gerenciar a comunicação com a API de Custos.
- * Esta versão simula as operações em memória para testes do front-end.
+ * Classe de serviço para gerenciar a comunicação com a API de Custos.
  */
 public class CustoService {
 
-    private final List<Custo> mockDatabase = new ArrayList<>();
-    private final AtomicLong idCounter = new AtomicLong(0);
+    private final HttpClient client = HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.NEVER)
+            .build();
 
-    public CustoService() {
-        // Adiciona alguns custos de exemplo ao iniciar o serviço
-        Custo c1 = new Custo();
-        c1.setId(idCounter.incrementAndGet());
-        c1.setImposto(new BigDecimal("0.15"));
-        c1.setCustoVariavel(new BigDecimal("0.05"));
-        c1.setCustoFixo(new BigDecimal("1500.00"));
-        c1.setMargemLucro(new BigDecimal("0.20"));
-        c1.setDataProcessamento(LocalDate.now().minusDays(30));
-        mockDatabase.add(c1);
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+            .create();
+    private final String API_URL = "http://localhost:8080/api/v1/custos";
 
-        Custo c2 = new Custo();
-        c2.setId(idCounter.incrementAndGet());
-        c2.setImposto(new BigDecimal("0.18"));
-        c2.setCustoVariavel(new BigDecimal("0.06"));
-        c2.setCustoFixo(new BigDecimal("1600.00"));
-        c2.setMargemLucro(new BigDecimal("0.22"));
-        c2.setDataProcessamento(LocalDate.now());
-        mockDatabase.add(c2);
+    // Classe interna para ajudar a desserializar a resposta paginada do Spring
+    private static class PageResponse<T> {
+        List<T> content;
     }
 
     /**
-     * Busca a lista de todos os custos (mock).
+     * Busca a lista de todos os custos da API.
      * @return Uma lista de custos.
      */
     public List<Custo> listarCustos() {
-        System.out.println("MOCK: Listando todos os custos...");
-        return new ArrayList<>(mockDatabase); // Retorna uma cópia para evitar modificações externas
+        try {
+            String urlComPaginacao = API_URL + "?page=0&size=100"; // Pede até 100 itens
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(urlComPaginacao))
+                    .header("Accept", "application/json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                Type pageType = new TypeToken<PageResponse<Custo>>() {}.getType();
+                PageResponse<Custo> pageResponse = gson.fromJson(response.body(), pageType);
+                return pageResponse.content;
+            } else {
+                System.err.println("Erro ao listar custos: " + response.statusCode() + " " + response.body());
+                return new ArrayList<>();
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     /**
-     * Salva um novo custo (mock).
+     * Salva um novo custo via API (somente POST).
      * @param custo O objeto Custo a ser salvo.
-     * @return O custo salvo (com ID, se for novo).
+     * @return O custo salvo.
      */
     public Custo salvarCusto(Custo custo) {
-        // A API de custos não tem PUT, apenas POST para novos registros
-        custo.setId(idCounter.incrementAndGet());
-        custo.setDataProcessamento(LocalDate.now()); // Garante que a data seja a atual para novos registros
-        mockDatabase.add(custo);
-        System.out.println("MOCK: Criando novo custo com ID: " + custo.getId());
-        return custo; // Retorna o custo com ID atribuído
+        try {
+            String jsonBody = gson.toJson(custo);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_URL))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 201) { // HTTP 201 Created
+                return gson.fromJson(response.body(), Custo.class);
+            } else {
+                System.err.println("Erro ao salvar custo: " + response.statusCode() + " " + response.body());
+                return null;
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
