@@ -16,7 +16,7 @@ public class VendasMenuPanel extends JPanel {
 
         Font buttonFont = new Font("SansSerif", Font.BOLD, 18);
 
-        JButton btnPdv = new JButton("Ponto de Venda");
+        JButton btnPdv = new JButton("Abastecimento");
         btnPdv.setFont(buttonFont);
         btnPdv.setPreferredSize(new Dimension(200, 50));
         gbc.gridy = 0;

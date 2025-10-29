@@ -44,9 +44,8 @@ public class MainScreen extends JFrame {
         gbc.insets = new Insets(15, 0, 15, 0); // Espaçamento vertical entre os botões
         mainPanel.add(btnCadastros, gbc);
 
-        // Botão Vendas (removido)
-        /*
-        JButton btnVendas = new JButton("Vendas");
+        // Botão Vendas
+        JButton btnVendas = new JButton("Central de Abastecimento");
         btnVendas.setFont(buttonFont);
         btnVendas.setPreferredSize(buttonSize);
         btnVendas.setBackground(new Color(60, 179, 113)); // MediumSeaGreen
@@ -55,13 +54,12 @@ public class MainScreen extends JFrame {
         btnVendas.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
         gbc.gridy = 2; // Terceira linha
         mainPanel.add(btnVendas, gbc);
-        */
 
         add(mainPanel, BorderLayout.CENTER);
 
         // Ações dos botões
         btnCadastros.addActionListener(e -> abrirJanela("Menu de Cadastros", new CadastroMenuPanel(this), 300, 450));
-        // btnVendas.addActionListener(e -> abrirJanela("Menu de Vendas", new VendasMenuPanel(this), 300, 200));
+        btnVendas.addActionListener(e -> abrirJanela("Menu de Vendas", new VendasMenuPanel(this), 300, 200));
     }
 
     // Método auxiliar para abrir janelas com tamanho customizado
