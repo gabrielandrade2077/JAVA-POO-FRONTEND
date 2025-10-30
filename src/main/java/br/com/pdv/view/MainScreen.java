@@ -41,34 +41,34 @@ public class MainScreen extends JFrame {
         gbc.insets = new Insets(0, 0, 30, 0); // Espaçamento maior abaixo da mensagem
         mainPanel.add(welcomeLabel, gbc);
 
-        // Botão Cadastros
-        JButton btnCadastros = new JButton("Cadastros");
-        btnCadastros.setFont(buttonFont);
-        btnCadastros.setPreferredSize(buttonSize);
-        btnCadastros.setBackground(new Color(70, 130, 180)); // SteelBlue
-        btnCadastros.setForeground(Color.WHITE);
-        btnCadastros.setFocusPainted(false);
-        btnCadastros.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
-        gbc.gridy = 1; // Segunda linha
-        gbc.insets = new Insets(15, 0, 15, 0); // Espaçamento vertical entre os botões
-        mainPanel.add(btnCadastros, gbc);
-
-        // Botão Vendas
-        JButton btnVendas = new JButton("Central de Abastecimento");
-        btnVendas.setFont(buttonFont);
-        btnVendas.setPreferredSize(buttonSize);
-        btnVendas.setBackground(new Color(60, 179, 113)); // MediumSeaGreen
-        btnVendas.setForeground(Color.WHITE);
-        btnVendas.setFocusPainted(false);
-        btnVendas.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
-        gbc.gridy = 2; // Terceira linha
-        mainPanel.add(btnVendas, gbc);
+        if ("admin".equals(loggedInUser)) {
+            // Botão Cadastros
+            JButton btnCadastros = new JButton("Cadastros");
+            btnCadastros.setFont(buttonFont);
+            btnCadastros.setPreferredSize(buttonSize);
+            btnCadastros.setBackground(new Color(70, 130, 180)); // SteelBlue
+            btnCadastros.setForeground(Color.WHITE);
+            btnCadastros.setFocusPainted(false);
+            btnCadastros.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+            gbc.gridy = 1; // Segunda linha
+            gbc.insets = new Insets(15, 0, 15, 0); // Espaçamento vertical entre os botões
+            mainPanel.add(btnCadastros, gbc);
+            btnCadastros.addActionListener(e -> abrirJanela("Menu de Cadastros", new CadastroMenuPanel(this), 300, 450));
+        } else if ("teste".equals(loggedInUser)) {
+            // Botão Vendas
+            JButton btnVendas = new JButton("Central de Abastecimento");
+            btnVendas.setFont(buttonFont);
+            btnVendas.setPreferredSize(buttonSize);
+            btnVendas.setBackground(new Color(60, 179, 113)); // MediumSeaGreen
+            btnVendas.setForeground(Color.WHITE);
+            btnVendas.setFocusPainted(false);
+            btnVendas.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+            gbc.gridy = 2; // Terceira linha
+            mainPanel.add(btnVendas, gbc);
+            btnVendas.addActionListener(e -> abrirJanela("Menu de Vendas", new VendasMenuPanel(this), 300, 200));
+        }
 
         add(mainPanel, BorderLayout.CENTER);
-
-        // Ações dos botões
-        btnCadastros.addActionListener(e -> abrirJanela("Menu de Cadastros", new CadastroMenuPanel(this), 300, 450));
-        btnVendas.addActionListener(e -> abrirJanela("Menu de Vendas", new VendasMenuPanel(this), 300, 200));
     }
 
     // Método auxiliar para abrir janelas com tamanho customizado

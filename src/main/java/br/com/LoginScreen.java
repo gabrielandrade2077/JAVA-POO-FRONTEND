@@ -47,7 +47,7 @@ public class LoginScreen extends JFrame {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
 
-                if ("admin".equals(username) && "admin".equals(password)) {
+                if (("admin".equals(username) && "admin".equals(password)) || ("teste".equals(username) && "teste".equals(password))) {
                     JOptionPane.showMessageDialog(null, "Login realizado com sucesso!");
                     dispose();
                     new MainScreen(username).setVisible(true);
