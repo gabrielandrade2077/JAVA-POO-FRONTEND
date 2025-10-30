@@ -50,7 +50,7 @@ public class LoginScreen extends JFrame {
                 if ("admin".equals(username) && "admin".equals(password)) {
                     JOptionPane.showMessageDialog(null, "Login realizado com sucesso!");
                     dispose();
-                    new MainScreen().setVisible(true);
+                    new MainScreen(username).setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(null, "Nome de usuário ou senha inválido");
                 }

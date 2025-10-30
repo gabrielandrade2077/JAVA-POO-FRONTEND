@@ -71,7 +71,7 @@ public class LoginScreen extends JFrame {
                     // Abrir a tela principal
                     dispose(); // Fecha a tela de login
                     SwingUtilities.invokeLater(() -> {
-                        MainScreen mainScreen = new MainScreen();
+                        MainScreen mainScreen = new MainScreen(username);
                         mainScreen.setVisible(true);
                     });
                 } else {

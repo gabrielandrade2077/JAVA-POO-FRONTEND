@@ -5,11 +5,20 @@ import java.awt.*;
 
 public class MainScreen extends JFrame {
 
-    public MainScreen() {
+    public MainScreen(String loggedInUser) {
         setTitle("Sistema PDV - Menu Principal");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        // Painel superior para o nome de usuário
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topPanel.setBackground(new Color(240, 240, 240));
+        JLabel userLabel = new JLabel("Usuário: " + loggedInUser);
+        userLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        topPanel.add(userLabel);
+        add(topPanel, BorderLayout.NORTH);
+
 
         // Painel principal com GridBagLayout para centralizar os botões
         JPanel mainPanel = new JPanel(new GridBagLayout());
