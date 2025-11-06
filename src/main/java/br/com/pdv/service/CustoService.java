@@ -72,6 +72,7 @@ public class CustoService {
     public Custo salvarCusto(Custo custo) {
         try {
             String jsonBody = gson.toJson(custo);
+            System.out.println("JSON enviado para o backend: " + jsonBody); // Adicionado para depuração
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(API_URL))
                     .header("Content-Type", "application/json")

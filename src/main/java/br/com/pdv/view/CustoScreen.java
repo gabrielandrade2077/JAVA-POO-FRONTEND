@@ -97,10 +97,17 @@ public class CustoScreen extends JPanel {
     private void salvarCusto() {
         try {
             Custo custo = new Custo();
-            custo.setImposto(new BigDecimal(impostoField.getText()));
-            custo.setCustoFixo(new BigDecimal(custoFixoField.getText()));
-            custo.setCustoVariavel(new BigDecimal(custoVariavelField.getText()));
-            custo.setMargemLucro(new BigDecimal(margemLucroField.getText()));
+            
+            // Helper function to safely parse BigDecimal, defaulting to 0 if empty
+            BigDecimal imposto = parseBigDecimalOrDefault(impostoField.getText());
+            BigDecimal custoFixo = parseBigDecimalOrDefault(custoFixoField.getText());
+            BigDecimal custoVariavel = parseBigDecimalOrDefault(custoVariavelField.getText());
+            BigDecimal margemLucro = parseBigDecimalOrDefault(margemLucroField.getText());
+
+            custo.setImposto(imposto);
+            custo.setCustoFixo(custoFixo);
+            custo.setCustoVariavel(custoVariavel);
+            custo.setMargemLucro(margemLucro);
             custo.setDataProcessamento(LocalDate.now()); // Data atual
 
             Custo custoSalvo = custoService.salvarCusto(custo);
@@ -114,6 +121,13 @@ public class CustoScreen extends JPanel {
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Por favor, insira valores numéricos válidos.", "Erro de Formato", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private BigDecimal parseBigDecimalOrDefault(String text) throws NumberFormatException {
+        if (text == null || text.trim().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return new BigDecimal(text);
     }
 
     private void atualizarTabela() {

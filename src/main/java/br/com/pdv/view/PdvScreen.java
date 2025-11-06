@@ -128,6 +128,34 @@ public class PdvScreen extends JPanel {
                 litrosField.setText("");
                 valorTotalField.setText("");
 
+                int option = JOptionPane.showConfirmDialog(panel, "Deseja imprimir o cupom fiscal?", "Cupom Fiscal", JOptionPane.YES_NO_OPTION);
+                if (option == JOptionPane.YES_OPTION) {
+                    JTextArea receiptArea = new JTextArea();
+                    receiptArea.setEditable(false);
+                    receiptArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                    String receiptText = "      *** CUPOM FISCAL ***\n" +
+                                       "------------------------------------\n" +
+                                       "Bomba: " + pumpTitle + "\n" +
+                                       "Combustível: " + fuelType + "\n" +
+                                       "Litros: " + String.format("%.3f", litros) + "\n" +
+                                       "Valor/Litro: " + currencyFormat.format(valorPorLitro) + "\n" +
+                                       "Total: " + currencyFormat.format(total) + "\n" +
+                                       "Pagamento: " + pagamento + "\n" +
+                                       "------------------------------------";
+                    receiptArea.setText(receiptText);
+
+                    JButton printButton = new JButton("Imprimir");
+                    printButton.addActionListener(printEvent -> {
+                        JOptionPane.showMessageDialog(panel, "Imprimindo cupom...", "Imprimir", JOptionPane.INFORMATION_MESSAGE);
+                    });
+
+                    JPanel receiptPanel = new JPanel(new BorderLayout());
+                    receiptPanel.add(new JScrollPane(receiptArea), BorderLayout.CENTER);
+                    receiptPanel.add(printButton, BorderLayout.SOUTH);
+
+                    JOptionPane.showMessageDialog(panel, receiptPanel, "Cupom Fiscal", JOptionPane.PLAIN_MESSAGE);
+                }
+
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(panel, "Valor de litros inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
             }

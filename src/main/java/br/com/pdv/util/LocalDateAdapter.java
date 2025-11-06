@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -15,14 +16,16 @@ import java.time.format.DateTimeFormatter;
  */
 public class LocalDateAdapter extends TypeAdapter<LocalDate> {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
+    // Use a formatter that can handle the full ISO date-time string, including offset
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     @Override
     public void write(final JsonWriter jsonWriter, final LocalDate localDate) throws IOException {
         if (localDate == null) {
             jsonWriter.nullValue();
         } else {
-            jsonWriter.value(localDate.format(FORMATTER));
+            // When writing, we still want to write just the local date part
+            jsonWriter.value(localDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
         }
     }
 
@@ -32,7 +35,14 @@ public class LocalDateAdapter extends TypeAdapter<LocalDate> {
             jsonReader.nextNull();
             return null;
         } else {
-            return LocalDate.parse(jsonReader.nextString(), FORMATTER);
+            String dateString = jsonReader.nextString();
+            try {
+                // Try to parse as ISO_OFFSET_DATE_TIME first
+                return LocalDateTime.parse(dateString, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate();
+            } catch (java.time.format.DateTimeParseException e) {
+                // If that fails, try parsing as ISO_LOCAL_DATE
+                return LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE);
+            }
         }
     }
 }
