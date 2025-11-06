@@ -14,7 +14,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Classe de serviço para gerenciar a comunicação com a API de Estoque.
@@ -62,7 +64,20 @@ public class EstoqueService {
 
     public Estoque salvarEstoque(Estoque estoque) {
         try {
-            String jsonBody = gson.toJson(estoque);
+            // Cria um Map para representar o DTO EstoqueRequest esperado pelo backend
+            Map<String, Object> estoqueRequest = new HashMap<>();
+            estoqueRequest.put("quantidade", estoque.getQuantidade());
+            estoqueRequest.put("localTanque", estoque.getLocalTanque());
+            estoqueRequest.put("loteFabricacao", estoque.getLoteFabricacao());
+            estoqueRequest.put("dataValidade", estoque.getDataValidade() != null ? estoque.getDataValidade().toString() : null);
+
+            if (estoque.getProduto() != null) {
+                estoqueRequest.put("produtoId", estoque.getProduto().getId());
+            } else {
+                estoqueRequest.put("produtoId", null);
+            }
+
+            String jsonBody = gson.toJson(estoqueRequest);
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .header("Content-Type", "application/json");
 
