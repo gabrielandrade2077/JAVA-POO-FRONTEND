@@ -14,7 +14,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Classe de serviço para gerenciar a comunicação com a API de Preços.
@@ -71,7 +73,18 @@ public class PrecoService {
      */
     public Preco salvarPreco(Preco preco) {
         try {
-            String jsonBody = gson.toJson(preco);
+            // Cria um Map para representar o DTO PrecoRequest esperado pelo backend
+            Map<String, Object> precoRequest = new HashMap<>();
+            precoRequest.put("valor", preco.getValor());
+
+            if (preco.getProduto() != null) {
+                precoRequest.put("produtoId", preco.getProduto().getId());
+            } else {
+                precoRequest.put("produtoId", null);
+            }
+
+            String jsonBody = gson.toJson(precoRequest);
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(API_URL))
                     .header("Content-Type", "application/json")

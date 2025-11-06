@@ -110,7 +110,11 @@ public class PrecoScreen extends JPanel {
 
         try {
             Preco preco = new Preco();
-            preco.setProduto(produtoSelecionado);
+            
+            Produto produtoParaSalvar = new Produto();
+            produtoParaSalvar.setId(produtoSelecionado.getId());
+            preco.setProduto(produtoParaSalvar);
+            
             preco.setValor(new BigDecimal(valorField.getText()));
             preco.setDataAlteracao(LocalDate.now());
 
