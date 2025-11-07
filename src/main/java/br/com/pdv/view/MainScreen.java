@@ -11,12 +11,28 @@ public class MainScreen extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Painel superior para o nome de usuário
+        // Painel superior para o nome de usuário e botão de logout
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         topPanel.setBackground(new Color(240, 240, 240));
         JLabel userLabel = new JLabel("Usuário: " + loggedInUser);
         userLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         topPanel.add(userLabel);
+
+        // Botão de Logout
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        logoutButton.setBackground(new Color(220, 53, 69)); // Cor vermelha para logout
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setFocusPainted(false);
+        logoutButton.addActionListener(e -> {
+            dispose(); // Fecha a tela principal
+            SwingUtilities.invokeLater(() -> {
+                new LoginScreen().setVisible(true); // Abre a tela de login
+            });
+        });
+        topPanel.add(Box.createHorizontalStrut(10)); // Espaçamento
+        topPanel.add(logoutButton);
+
         add(topPanel, BorderLayout.NORTH);
 
 

@@ -1,5 +1,6 @@
 package br.com;
 
+import br.com.pdv.view.LoginScreen;
 import javax.swing.*;
 
 public class Main {
